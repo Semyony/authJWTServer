@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-let mongoDBConnectionString =
-`mongodb+srv://semy:${process.env.MONGO_PASSWORD}@cluster0.buq2s.mongodb.net/senecamusic?retryWrites=true&w=majority`;
+let mongoDBConnectionString = `mongodb+srv://semy:${process.env.MONGO_PASSWORD}@cluster0.buq2s.mongodb.net/senecamusic?retryWrites=true&w=majority`;
 
 let Schema = mongoose.Schema;
 let userSchema = new Schema({
@@ -32,6 +31,10 @@ module.exports.connect = function () {
   });
 };
 
+module.exports.byId = (id) => {
+  return User.findById(id).exec();
+};
+
 module.exports.registerUser = function (userData) {
   return new Promise(function (resolve, reject) {
     if (userData.password != userData.password2) {
@@ -41,7 +44,6 @@ module.exports.registerUser = function (userData) {
         .hash(userData.password, 10)
         .then((hash) => {
           userData.password = hash;
-
           let newUser = new User(userData);
 
           newUser.save((err) => {
@@ -106,6 +108,7 @@ module.exports.addFavourite = function (id, favId) {
           )
             .exec()
             .then((user) => {
+              console.log(user);
               resolve(user.favourites);
             })
             .catch((err) => {
@@ -123,7 +126,9 @@ module.exports.removeFavourite = function (id, favId) {
     User.findByIdAndUpdate(id, { $pull: { favourites: favId } }, { new: true })
       .exec()
       .then((user) => {
+        console.log(user.favourites);
         resolve(user.favourites);
+
       })
       .catch((err) => {
         reject(`Unable to update favourites for user with id: ${id}`);

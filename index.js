@@ -24,14 +24,19 @@ passport.use(
       secretOrKey: process.env.JWT_SECRET,
     },
     async function verify(payload, done) {
-      if (!payload) { return done(null, false); }
+      if (!payload) {
+        return done(null, false);
+      }
       let user;
-      try { user = await userService.byId(payload._id);
+      try {
+        user = await userService.byId(payload._id);
       } catch (err) {
         console.log(err);
         return done(null, false);
       }
-      if (!user) { return done(null, false); }
+      if (!user) {
+        return done(null, false);
+      }
       done(null, user);
     }
   )
@@ -46,12 +51,15 @@ function createToken(id, username) {
 }
 
 app.post("/api/user/register", function (req, res) {
+  console.log(1);
   userService
     .registerUser(req.body)
     .then((mes) => {
+      console.log(1);
       res.status(200).json({ message: mes });
     })
     .catch((err) => {
+      console.log(1);
       res.status(422).json({ message: err });
     });
 });
@@ -104,8 +112,9 @@ app.delete(
   passport.authenticate("jwt", { session: false }),
   function (req, res) {
     userService
-      .removeFavourite()
+      .removeFavourite(req.user._id, req.params.id)
       .then((fav) => {
+        console.log(fav);
         res.status(200).json(fav);
       })
       .catch((err) => {
